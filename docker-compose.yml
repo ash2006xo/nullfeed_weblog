@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: nullfeed-postgres
+    environment:
+      POSTGRES_USER: nullfeed
+      POSTGRES_PASSWORD: devpassword
+      POSTGRES_DB: nullfeed
+    ports:
+      - "5432:5432"
+    volumes:
+      - nullfeed-pgdata:/var/lib/postgresql/data
+
+volumes:
+  nullfeed-pgdata:
