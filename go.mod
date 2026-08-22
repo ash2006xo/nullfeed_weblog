@@ -5,6 +5,7 @@ go 1.26.5
 require (
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.15.4
+	github.com/lib/pq v1.12.3
 )
 
 require (

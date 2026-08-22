@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 
 	"github.com/ash2006xo/nullfeed_weblog/internal/config"
+	"github.com/ash2006xo/nullfeed_weblog/internal/db"
 )
 
 func main() {
@@ -15,13 +16,28 @@ func main() {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
+	database, err := db.New(cfg.DatabaseURL)
+	if err != nil {
+		log.Fatalf("failed to connect to database: %v", err)
+	}
+	defer database.Close()
+
 	e := echo.New()
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
 	e.GET("/health", func(c echo.Context) error {
-		return c.JSON(200, map[string]string{"status": "ok"})
+		if err := database.Ping(); err != nil {
+			return c.JSON(500, map[string]string{
+				"status": "error",
+				"db":     "unreachable",
+			})
+		}
+		return c.JSON(200, map[string]string{
+			"status": "ok",
+			"db":     "connected",
+		})
 	})
 
 	log.Printf("starting server on port %s", cfg.Port)
