@@ -37,6 +37,8 @@ func main() {
 	e.Use(echomw.Logger())
 	e.Use(echomw.Recover())
 
+	e.Static("/", "web")
+
 	e.GET("/health", func(c echo.Context) error {
 		if err := database.Ping(); err != nil {
 			return c.JSON(500, map[string]string{"status": "error", "db": "unreachable"})
@@ -45,6 +47,7 @@ func main() {
 	})
 
 	api := e.Group("/api")
+
 	api.POST("/signup", authHandler.Signup)
 	api.POST("/login", authHandler.Login)
 
