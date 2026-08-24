@@ -54,3 +54,11 @@ func CurrentUserID(c echo.Context) (int, bool) {
 	}
 	return v.(int), true
 }
+
+func CurrentUsername(c echo.Context) (string, bool) {
+	v := c.Get(contextUsernameKey)
+	if v == nil {
+		return "", false
+	}
+	return v.(string), true
+}

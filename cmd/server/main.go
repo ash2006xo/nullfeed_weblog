@@ -4,11 +4,12 @@ import (
 	"log"
 
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	echomw "github.com/labstack/echo/v4/middleware"
 
 	"github.com/ash2006xo/nullfeed_weblog/internal/config"
 	"github.com/ash2006xo/nullfeed_weblog/internal/db"
 	"github.com/ash2006xo/nullfeed_weblog/internal/handler"
+	custommw "github.com/ash2006xo/nullfeed_weblog/internal/middleware"
 	"github.com/ash2006xo/nullfeed_weblog/internal/repository"
 )
 
@@ -25,11 +26,14 @@ func main() {
 	defer database.Close()
 
 	userRepo := repository.NewUserRepository(database)
+	boardRepo := repository.NewBoardRepository(database)
+
 	authHandler := handler.NewAuthHandler(userRepo, cfg.JWTSecret)
+	boardHandler := handler.NewBoardHandler(boardRepo)
 
 	e := echo.New()
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
+	e.Use(echomw.Logger())
+	e.Use(echomw.Recover())
 
 	e.GET("/health", func(c echo.Context) error {
 		if err := database.Ping(); err != nil {
@@ -41,6 +45,11 @@ func main() {
 	api := e.Group("/api")
 	api.POST("/signup", authHandler.Signup)
 	api.POST("/login", authHandler.Login)
+
+	api.GET("/boards", boardHandler.List, custommw.OptionalAuth(cfg.JWTSecret))
+	api.GET("/boards/:id", boardHandler.Get, custommw.OptionalAuth(cfg.JWTSecret))
+	api.POST("/boards", boardHandler.Create, custommw.RequireAuth(cfg.JWTSecret))
+	api.DELETE("/boards/:id", boardHandler.Delete, custommw.RequireAuth(cfg.JWTSecret))
 
 	log.Printf("starting server on port %s", cfg.Port)
 	if err := e.Start(":" + cfg.Port); err != nil {

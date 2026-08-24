@@ -18,7 +18,7 @@ func NewBoardRepository(db *sql.DB) *BoardRepository {
 	return &BoardRepository{db: db}
 }
 
-func (r *BoardRepository) Create(title, content string, imageURL *string, isPrivate bool, authorID int) (*model.Board, error) {
+func (r *BoardRepository) Create(title, content string, imageURL *string, isPrivate bool, authorID int, authorName string) (*model.Board, error) {
 	query := `
 		INSERT INTO boards (title, content, image_url, is_private, author_id)
 		VALUES ($1, $2, $3, $4, $5)
@@ -34,6 +34,8 @@ func (r *BoardRepository) Create(title, content string, imageURL *string, isPriv
 	if err != nil {
 		return nil, err
 	}
+
+	b.AuthorName = authorName
 
 	if img.Valid {
 		b.ImageURL = &img.String
