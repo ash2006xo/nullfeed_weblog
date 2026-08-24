@@ -27,9 +27,11 @@ func main() {
 
 	userRepo := repository.NewUserRepository(database)
 	boardRepo := repository.NewBoardRepository(database)
+	commentRepo := repository.NewCommentRepository(database)
 
 	authHandler := handler.NewAuthHandler(userRepo, cfg.JWTSecret)
 	boardHandler := handler.NewBoardHandler(boardRepo)
+	commentHandler := handler.NewCommentHandler(commentRepo, boardRepo)
 
 	e := echo.New()
 	e.Use(echomw.Logger())
@@ -50,6 +52,9 @@ func main() {
 	api.GET("/boards/:id", boardHandler.Get, custommw.OptionalAuth(cfg.JWTSecret))
 	api.POST("/boards", boardHandler.Create, custommw.RequireAuth(cfg.JWTSecret))
 	api.DELETE("/boards/:id", boardHandler.Delete, custommw.RequireAuth(cfg.JWTSecret))
+
+	api.GET("/boards/:id/comments", commentHandler.List, custommw.OptionalAuth(cfg.JWTSecret))
+	api.POST("/boards/:id/comments", commentHandler.Create, custommw.RequireAuth(cfg.JWTSecret))
 
 	log.Printf("starting server on port %s", cfg.Port)
 	if err := e.Start(":" + cfg.Port); err != nil {
