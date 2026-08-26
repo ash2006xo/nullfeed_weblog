@@ -213,14 +213,13 @@ func (h *BoardHandler) getOwnedBoard(c echo.Context) (*model.Board, error) {
 }
 
 func isSafeImageURL(raw string) bool {
-	u, err := url.Parse(raw)
-	if err != nil {
-		return false
-	}
-	// Uploads stored by nullfeed are intentionally returned as same-origin
-	// relative URLs. External image URLs may only use http or https.
-	if strings.HasPrefix(raw, "/uploads/") && !strings.Contains(raw, "\\") {
+	if strings.HasPrefix(raw, "/uploads/") {
 		return true
 	}
-	return u.Host != "" && (u.Scheme == "http" || u.Scheme == "https")
+
+	u, err := url.Parse(raw)
+	if err != nil || u.Host == "" {
+		return false
+	}
+	return u.Scheme == "http" || u.Scheme == "https"
 }
