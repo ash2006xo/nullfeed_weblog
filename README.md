@@ -1,6 +1,6 @@
 # nullfeed weblog
 
-A small weblog built with **Go, Echo, PostgreSQL and vanilla JavaScript**. The project keeps a deliberately dark, minimal visual style while focusing on writing, private sharing and conversations.
+A small weblog built with **Go, Echo, PostgreSQL and JavaScript**. The project keeps a deliberately dark, minimal visual style while focusing on writing, private sharing and conversations.
 
 ## Features
 
