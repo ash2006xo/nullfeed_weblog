@@ -99,4 +99,4 @@ https://github.com/ash2006xo/nullfeed_weblog
 
 Live application:
 
-_Add the final deployed URL here after the production deployment is verified._
+https://nullfeed.onrender.com
