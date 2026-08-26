@@ -29,8 +29,13 @@ func GenerateToken(userID int, username string, secret string) (string, error) {
 func ParseToken(tokenString string, secret string) (*Claims, error) {
 	claims := &Claims{}
 
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {return []byte(secret), nil})
-	
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
+		if t.Method != jwt.SigningMethodHS256 {
+			return nil, jwt.ErrSignatureInvalid
+		}
+		return []byte(secret), nil
+	})
+
 	if err != nil {
 		return nil, err
 	}

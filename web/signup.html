@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign up</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <nav>
+        <div class="container nav-inner"><a href="/" class="brand"><span class="brand-mark">∿</span> nullfeed</a>
+            <div class="links" id="nav-links"></div>
+        </div>
+    </nav>
+    <main class="container auth-main">
+        <section class="auth-card card"><span class="section-kicker">nullfeed</span>
+            <h1>Make yourself at home.</h1>
+            <p class="intro">Create a place for your thoughts.</p>
+            <form id="signup-form">
+                <div class="field"><label for="username">Username</label><input type="text" id="username"
+                        name="username" maxlength="30" pattern="[A-Za-z0-9_-]+" required autocomplete="username"
+                        placeholder="your_username"></div>
+                <div class="field"><label for="password">Password</label><input type="password" id="password"
+                        name="password" required autocomplete="new-password" minlength="8"
+                        placeholder="At least 8 characters"></div>
+                <p class="error" id="error-msg" style="display:none;"></p><button type="submit"
+                    class="btn btn-large">Create account <span>→</span></button>
+            </form>
+            <p class="auth-footer">Already have an account? <a href="/login.html">Log in</a></p>
+        </section>
+    </main>
+    <script src="/js/utils.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/nav.js"></script>
+    <script src="/js/signup.js"></script>
+</body>
+
+</html>

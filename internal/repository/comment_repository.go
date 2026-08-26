@@ -48,7 +48,7 @@ func (r *CommentRepository) ListByBoard(boardID int) ([]model.Comment, error) {
 	}
 	defer rows.Close()
 
-	var comments []model.Comment
+	comments := []model.Comment{}
 	for rows.Next() {
 		var cm model.Comment
 		if err := rows.Scan(&cm.ID, &cm.BoardID, &cm.AuthorID, &cm.AuthorName, &cm.Content, &cm.CreatedAt); err != nil {

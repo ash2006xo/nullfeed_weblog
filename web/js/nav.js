@@ -1,36 +1,34 @@
-function getCurrentUsername() {
-  return sessionStorage.getItem("username");
-}
+let currentUser = null;
 
-function setCurrentUsername(username) {
-  sessionStorage.setItem("username", username);
-}
+function getCurrentUsername() { return currentUser?.username || null; }
+function setCurrentUsername(username) { currentUser = username ? { username } : null; }
+function clearCurrentUsername() { currentUser = null; }
 
-function clearCurrentUsername() {
-  sessionStorage.removeItem("username");
+async function loadCurrentUser() {
+  try { currentUser = await api.me(); } catch (_) { currentUser = null; }
+  renderNav();
+  return currentUser;
 }
 
 function renderNav() {
-  const username = getCurrentUsername();
   const linksEl = document.getElementById("nav-links");
   if (!linksEl) return;
-
-  if (username) {
+  if (currentUser) {
     linksEl.innerHTML = `
-      <a href="/create.html">New post</a>
-      <span>${username}</span>
-      <button id="logout-btn">Log out</button>
+      <a class="nav-create" href="/create.html"><span>＋</span> New post</a>
+      <span class="nav-user"><span class="author-avatar">${escapeHtml(getInitials(currentUser.username))}</span>${escapeHtml(currentUser.username)}</span>
+      <button class="nav-logout" id="logout-btn" type="button">Log out</button>
     `;
-    document.getElementById("logout-btn").addEventListener("click", () => {
+    document.getElementById("logout-btn").addEventListener("click", async () => {
+      const button = document.getElementById("logout-btn");
+      button.disabled = true;
+      try { await api.logout(); } catch (_) {}
       clearCurrentUsername();
-      window.location.href = "/index.html";
+      window.location.href = "/";
     });
   } else {
-    linksEl.innerHTML = `
-      <a href="/login.html">Log in</a>
-      <a href="/signup.html">Sign up</a>
-    `;
+    linksEl.innerHTML = `<a href="/login.html">Log in</a><a class="nav-signup" href="/signup.html">Sign up</a>`;
   }
 }
 
-document.addEventListener("DOMContentLoaded", renderNav);
+window.authReady = loadCurrentUser();

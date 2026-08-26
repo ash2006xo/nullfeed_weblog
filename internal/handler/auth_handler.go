@@ -3,11 +3,14 @@ package handler
 import (
 	"errors"
 	"net/http"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
 
 	"github.com/ash2006xo/nullfeed_weblog/internal/auth"
+	custommw "github.com/ash2006xo/nullfeed_weblog/internal/middleware"
 	"github.com/ash2006xo/nullfeed_weblog/internal/repository"
 )
 
@@ -31,8 +34,12 @@ func (h *AuthHandler) Signup(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
 	}
 
+	req.Username = strings.TrimSpace(req.Username)
 	if req.Username == "" || req.Password == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "username and password are required"})
+	}
+	if len(req.Username) < 3 || len(req.Username) > 30 || !regexp.MustCompile(`^[A-Za-z0-9_-]+$`).MatchString(req.Username) {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "username must be 3-30 characters and use only letters, numbers, _ or -"})
 	}
 	if len(req.Password) < 8 {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "password must be at least 8 characters"})
@@ -72,6 +79,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
 	}
 
+	req.Username = strings.TrimSpace(req.Username)
 	user, err := h.userRepo.GetByUsername(req.Username)
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "invalid username or password"})
@@ -91,6 +99,15 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
+func (h *AuthHandler) Me(c echo.Context) error {
+	userID, ok := custommw.CurrentUserID(c)
+	if !ok {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "authentication required"})
+	}
+	username, _ := custommw.CurrentUsername(c)
+	return c.JSON(http.StatusOK, map[string]interface{}{"id": userID, "username": username})
+}
+
 func setAuthCookie(c echo.Context, token string) {
 	cookie := new(http.Cookie)
 	cookie.Name = "auth_token"
@@ -99,5 +116,19 @@ func setAuthCookie(c echo.Context, token string) {
 	cookie.HttpOnly = true
 	cookie.Path = "/"
 	cookie.SameSite = http.SameSiteLaxMode
+	cookie.Secure = c.Request().TLS != nil || c.Request().Header.Get("X-Forwarded-Proto") == "https"
 	c.SetCookie(cookie)
+}
+
+func (h *AuthHandler) Logout(c echo.Context) error {
+	cookie := new(http.Cookie)
+	cookie.Name = "auth_token"
+	cookie.Value = ""
+	cookie.Expires = time.Unix(0, 0)
+	cookie.HttpOnly = true
+	cookie.Path = "/"
+	cookie.SameSite = http.SameSiteLaxMode
+	cookie.Secure = c.Request().TLS != nil || c.Request().Header.Get("X-Forwarded-Proto") == "https"
+	c.SetCookie(cookie)
+	return c.NoContent(http.StatusOK)
 }
