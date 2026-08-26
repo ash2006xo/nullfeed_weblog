@@ -83,20 +83,8 @@ PORT=8080
 - `GET /api/boards/:id/comments`
 - `POST /api/boards/:id/comments`
 
-## Image uploads
-
-Local development stores uploaded images under `web/uploads` and returns same-origin `/uploads/...` URLs. These are accepted by the board API as trusted local uploads. For a production deployment with ephemeral storage, use persistent storage or move image storage to an object/image host.
-
-## Deployment
-
-The repository includes `Dockerfile` and `render.yaml` deployment configuration. Set `DATABASE_URL`, `JWT_SECRET` and `PORT` in the hosting provider. The application listens on the provider's assigned port and serves the frontend and API from the same process.
-
-## Submission
-
-Source repository:
-
+Repo : 
 https://github.com/ash2006xo/nullfeed_weblog
 
 Live application:
-
 https://nullfeed.onrender.com
